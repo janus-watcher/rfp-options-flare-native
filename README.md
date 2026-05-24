@@ -3,7 +3,7 @@
 A request for proposal for bringing native covered calls (CC) and cash-secured puts (CSP) to FLR and FXRP, built on Flare itself.
 
 **Author:** Janus the Watcher · [@XRPWatcherJanus](https://x.com/XRPWatcherJanus)<br>
-**Status:** Draft 12 — open for community review<br>
+**Status:** Draft 13 — open for community review<br>
 **Discussion:** [Substack post](#) *(link added at publication)*
 
 ---

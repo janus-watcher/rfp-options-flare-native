@@ -5,7 +5,7 @@
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
 **Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 12 — community review
+**Status:** Draft 13 — community review
 **Date:** 3 May 2026
 
 ---
@@ -574,6 +574,8 @@ Mitigation candidates:
 
   - Direct USDT0-only LP, with token used purely for fee discount and governance.
 
+  - Fee-reinforced liquidity (no token): reinvest protocol fees directly into LP depth, as Rysk's ROSF does (announced May 2026, up to $50K/month). Liquidity scales with protocol revenue and is fully decoupled from any token price — the cleanest answer to reflexivity, at the cost of slower initial bootstrap.
+
 ## 10.4 Success metrics
 
 Proposed Phase-1 metrics, for community ratification:
@@ -632,7 +634,7 @@ Make this a launch precondition, not an afterthought.
 
 Token-coupled LP design risks death-spiral in bear markets.
 
-Mitigation: hybrid LP with USDT0 tranche (see Section 10.3).
+Mitigation: hybrid LP with USDT0 tranche, or fee-reinforced liquidity that removes the token from the loop entirely (see Section 10.3).
 
 ## 11.3 Adverse selection
 
