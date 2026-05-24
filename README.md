@@ -3,7 +3,7 @@
 A request for proposal for bringing native covered calls (CC) and cash-secured puts (CSP) to FLR and FXRP, built on Flare itself.
 
 **Author:** Janus the Watcher · [@XRPWatcherJanus](https://x.com/XRPWatcherJanus)<br>
-**Status:** Draft 8 — open for community review<br>
+**Status:** Draft 12 — open for community review<br>
 **Discussion:** [Substack post](#) *(link added at publication)*
 
 ---
@@ -19,7 +19,7 @@ This RFP lays out the business case, stakeholder economics, spread mechanics, or
 | File | Contents |
 |---|---|
 | [`RFP-Options-Flare-Native.md`](RFP-Options-Flare-Native.md) | Full RFP, readable on GitHub |
-| [`RFP-Options-Flare-Native-Draft8.pdf`](RFP-Options-Flare-Native-Draft8.pdf) | PDF version for download / print |
+| [`RFP-Options-Flare-Native.pdf`](RFP-Options-Flare-Native.pdf) | PDF version for download / print |
 
 ## Structure
 
@@ -28,11 +28,11 @@ This RFP lays out the business case, stakeholder economics, spread mechanics, or
 3. Asset Roadmap — FLR/FXRP → FBTC → sFLR/stXRP
 4. Stakeholder Economics — sellers, buyers, protocol, LPs
 5. Spread Calculation — FTSO-based IV surface, quanto-adjusted pricing
-6. Order Matching — Spectra-pattern rails, multi-numéraire dimension, AMM/RFQ/CLOB
+6. Order Matching — Spectra-pattern rails, pricing yardstick vs. settlement currency, AMM/RFQ/CLOB
 7. Smart Contract Architecture — vaults, pricer, settlement, rail factory, strategy interface
-8. Curated Vault Layer — distribution through human and AI curators
+8. Curated Vault Layer — distribution through human and AI curators (Sentora + Firelight)
 9. Capital Requirements
-10. Open Questions — builder selection, insurance, tokenomics, metrics, compliance, numéraire choice
+10. Open Questions — builder selection, insurance, tokenomics, metrics, compliance, yardstick/settlement choice
 11. Failure Modes — eleven scenarios that would kill the project
 12. Sources
 

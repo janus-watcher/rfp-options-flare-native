@@ -5,7 +5,7 @@
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
 **Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 8 — community review
+**Status:** Draft 12 — community review
 **Date:** 3 May 2026
 
 ---
@@ -24,7 +24,7 @@ The single existing provider for FXRP options has positioned itself as a B2B vau
 
 This document lays out the business case for building a native options venue on Flare. The launch is structured around the simultaneous deployment of covered calls (CC) and cash-secured puts (CSP), denominated in USDT0 collateral by default, priced through FTSO data, and architected after the Spectra pattern of permissionless per-maturity rails.
 
-The rail factory pattern (Section 7.5) supports multiple numéraires from day one. USDT0-denominated rails are the Phase 1 default. XRP-denominated (and later FBTC-denominated) rails can be deployed permissionlessly by any party that wants to express options exposure in the native asset itself, without stablecoin as anchor.
+The rail factory pattern (Section 7.5) separates two things most venues fuse: the pricing yardstick and the settlement currency. USD-priced, USDT0-settled is the Phase 1 default. But rails can be coin-settled — collateral and premium in FXRP, no stablecoin held — and FXRP can serve as the pricing yardstick for non-XRP underliers like FBTC. Used that way, FXRP becomes a potential reserve unit of the Flare options economy, not merely a wrapped asset.
 
 Phase 1 covers FLR and FXRP. The contract architecture is asset-agnostic.
 
@@ -62,7 +62,7 @@ CC alone serves bag-holders. CSP alone serves cash-holders waiting for an entry.
 
 Default collateral anchor: USDT0. Stable, on-chain, accepted as base unit for CSP collateral and premium settlement on the Phase 1 launch rails.
 
-Alternative numéraires are architecturally supported (Section 6.1, 7.5, Open Question 10.6). XRP-denominated rails let holders express options exposure entirely in FXRP — strike, premium, settlement — without stablecoin involvement. The market decides which numéraire attracts liquidity.
+Settlement currency is a separate axis from the pricing yardstick (Section 6.1.1, Open Question 10.6). Coin-settled rails let holders post collateral and collect premium in FXRP, holding no stablecoin, even when the strike references USD for a clean volatility surface. The market decides which configuration attracts liquidity.
 
 ## 2.3 The structural opening
 
@@ -86,6 +86,16 @@ The opening for a Flare-native venue:
 The argument is not "a better Rysk."
 
 The argument is: Rysk priced itself out of an entire user segment. That segment is concentrated on Flare.
+
+## 2.4 Lot size: the second moat
+
+Traditional equity options trade in standardised hundred-share contracts. That convention sets a hard capital floor on any single position before the first premium clears.
+
+On-chain, a covered call or cash-secured put writes against any fraction of the underlying. The minimum lot is whatever the contract allows, with gas as the only practical floor, not a hundred-unit convention inherited from the trading pit.
+
+This collapses the entry threshold from Rysk's $250K gate to near-dust positions, and expands the addressable market by an order of magnitude.
+
+The unserved segment is not only holders below $250K. It is every position size that standardised contract conventions never accommodated. Fractional lot capability is a structural advantage of on-chain settlement that no wrapped or hosted venue inherits for free.
 
 # 3. Asset Roadmap
 
@@ -163,7 +173,7 @@ Holds FLR, FXRP (or FBTC in Phase 2). Wants premium income while maintaining exp
 
 Sells a call with a strike above current price.
 
-  - Gains: premium credited in USDT0 (or FXRP, depending on rail numéraire — see Section 6.1) immediately on writing. Premium scales with IV and time to expiry.
+  - Gains: premium credited in the rail's settlement currency (USDT0 by default, FXRP on coin-settled rails — see Section 6.1.1) immediately on writing. Premium scales with IV and time to expiry.
 
   - Risks: capped upside above strike. If price moves above strike at expiry, underlying is assigned and seller loses upside.
 
@@ -175,9 +185,9 @@ Sells a call with a strike above current price.
 
 ## 4.2 The CSP Seller (cash-secured put writer)
 
-Holds USDT0 (default rails) or FXRP (sovereign rails). Wants to accumulate FLR, FXRP, or FBTC at a chosen lower entry price, with premium income while waiting.
+Holds the settlement currency and wants to accumulate the underlying at a lower entry. USDT0 to accumulate FXRP or FBTC; FXRP itself to accumulate FBTC or FLR on coin-settled rails. Premium income accrues while waiting. (A put on FXRP settled in FXRP is degenerate — you cannot get paid to buy an asset with the same asset — so FXRP-underlying puts settle in USDT0.)
 
-  - Gains: premium credited in the rail numéraire (USDT0 default, FXRP for sovereign rails) immediately on writing. Effectively gets paid to set a limit-buy order.
+  - Gains: premium credited in the settlement currency (USDT0 default, FXRP on coin-settled rails) immediately on writing. Effectively gets paid to set a limit-buy order.
 
   - Risks: assigned underlying at strike if price falls below strike at expiry. Locked stablecoin until expiry or close.
 
@@ -247,7 +257,7 @@ LPs underwrite the option supply. They are the counterparty to every buyer.
 
   - Curated-vault implication (Section 8): curators aggregate retail and mid-cap LP into single vault deposits. The venue scales LP depth faster through five curators with $5M each than through five hundred direct LPs.
 
-  - Multi-numéraire implication (Section 6.1): LP-vaults are deployed per (asset, numéraire) pair. A USDT0-rail LP and an FXRP-rail LP are separate pools. Curators can run cross-numéraire arbitrage strategies. Liquidity will fragment if both rails launch simultaneously without buyer flow on each — see Failure Mode 11.11.
+  - Multi-configuration implication (Section 6.1): LP-vaults are deployed per rail, which means per (underlying, yardstick, settlement-currency). A USDT0-settled LP and an FXRP-settled LP are separate pools. Curators can run cross-rail arbitrage. Liquidity fragments if too many configurations launch at once without buyer flow on each (see Failure Mode 11.11).
 
 # 5. Spread Calculation
 
@@ -259,7 +269,7 @@ The construction proposed:
 
 Theoretical mid = Black-Scholes (or a chosen successor model) using FTSO spot for the underlying and a venue-specific IV surface.
 
-Numéraire-adjusted pricing: rails denominated in non-stable assets (FXRP, FBTC) require quanto-adjustments to the standard Black-Scholes formula because the strike value drifts with the numéraire's own USD-vol. The pricer must implement both stable-numéraire and quanto modes selectable per rail at deployment.
+Quanto-adjusted pricing: when a rail's settlement currency differs from its pricing yardstick — a USD-priced option settled in FXRP, for example — the payoff needs a quanto adjustment to standard Black-Scholes, because the settlement asset's own USD-volatility shifts the effective payoff. The pricer must implement both plain and quanto modes, selectable per rail at deployment.
 
 The IV surface is sourced from three inputs:
 
@@ -283,33 +293,37 @@ Stress simulations should be a precondition for mainnet.
 
 ## 6.1 The Spectra pattern: per-rail markets
 
-Each (asset, numéraire, strike, maturity) tuple is its own market — a "rail".
+Each rail is a distinct market, defined by its underlying, pricing yardstick, settlement currency, strike, and maturity.
 
 Rails are deployed as independent contract instances, not entries in a global order book.
 
-Permissionless rail creation: any party can deploy a new rail for an approved (asset, numéraire, maturity) combination.
+Permissionless rail creation: any party can deploy a rail for an approved (underlying, yardstick, settlement-currency, maturity) combination.
 
-The protocol curates allowed maturities, approved underliers, and approved numéraires. It does not curate deployers.
+The protocol curates allowed maturities, approved underliers, approved yardsticks, and approved settlement currencies. It does not curate deployers.
 
-### 6.1.1 Numéraire dimension
+### 6.1.1 Two axes: pricing yardstick and settlement currency
 
-Phase 1 default: USDT0-denominated rails. Strike, premium, and settlement all in USDT0. Stable, easy to price, intuitive for retail and treasury users.
+Most venues fuse two distinct choices into one. Separating them is the design unlock here.
 
-Architecturally supported from day one: alternative numéraires. The most relevant case is XRP-denominated rails (strike in XRP, premium in FXRP, settlement in FXRP) — what TradFi calls "coin-margined" options. Deribit runs both stable-margined and coin-margined markets in parallel for BTC/ETH.
+The pricing yardstick is the unit the strike and premium are quoted in. It must differ from the underlying, because an asset has no volatility surface against itself. An FXRP option priced in XRP is degenerate: FXRP tracks XRP one-to-one through the FAsset peg, so the result is a de-peg bet, not a volatility market. FXRP options must be priced against USD, FLR, or FBTC.
 
-Why this matters: holders who refuse stablecoin exposure on principle (sovereignty thesis) get a rail that keeps them entirely in the native asset. The numéraire choice becomes a market expression — buyers and sellers self-select into the rail that matches their conviction.
+The settlement currency is what collateral is posted in and premium is paid in. It is independent of the yardstick. A USD-priced option can settle in FXRP. That is coin-margining, exactly what Deribit runs alongside stable-margined options for BTC and ETH.
 
-The protocol does not pick a winner. The rail factory deploys whichever (asset, numéraire) pair the community asks for, within the curated approved-numéraire list.
+Why this matters: the sovereignty thesis lives on the settlement axis, not the pricing axis. A holder who refuses stablecoin posts FXRP, collects premium in FXRP, and never touches USDT0, even while the strike references USD for a clean surface. No stablecoin is held or settled, only referenced as a measuring stick.
+
+FXRP can also be the yardstick itself, but only for non-XRP underliers. FBTC priced in FXRP, FLR priced in FXRP, FDOGE priced in FXRP: these are genuine volatility markets, because the cross-rate moves. Used this way, FXRP becomes the unit of account of the Flare options economy, the reserve asset other FAssets are quoted against. Every such rail generates FXRP demand and velocity, feeding the fee-burn and FIRE flywheel the FLR thesis depends on.
+
+The protocol does not pick a winner. The rail factory deploys whatever configuration the community asks for, within the curated approved lists.
 
 ### 6.1.2 Cadence and fragmentation
 
-Cadence proposal: one maturity per month per (asset, numéraire) pair.
+Cadence proposal: one maturity per month per rail configuration.
 
 This reduces fragmentation, aligns with TradFi monthly options conventions, and simplifies LP duration management.
 
 Quarterly maturities (3, 6, 9, 12 months) optional after volume validates.
 
-Multi-numéraire fragmentation risk is real. Two rails per asset per maturity halves per-rail Open Interest. See Failure Mode 11.11 for the mitigation logic.
+Configuration fragmentation risk is real. Each added yardstick or settlement currency multiplies the rails per underlying and splits per-rail Open Interest. See Failure Mode 11.11 for the mitigation logic.
 
 ## 6.2 AMM vs. RFQ vs. CLOB
 
@@ -336,7 +350,7 @@ The architecture is asset-agnostic by design — adding FBTC, sFLR, or stXRP lat
 
   - CCVault: holds underlying collateral (FLR, FXRP, FBTC, ...), issues call options against it, handles assignment by transferring underlying.
 
-  - CSPVault: holds rail-numéraire collateral (USDT0 by default, FXRP for sovereign rails), issues put options against it, handles assignment by buying underlying at strike.
+  - CSPVault: holds settlement-currency collateral (USDT0 by default, FXRP on coin-settled rails), issues put options against it, handles assignment by buying underlying at strike.
 
   - LPVault: pools capital from token-holders, writes options on the user's behalf, distributes fees and premium. Multi-asset with optional per-asset isolation pools.
 
@@ -344,7 +358,7 @@ The architecture is asset-agnostic by design — adding FBTC, sFLR, or stXRP lat
 
   - OptionPricer: deterministic Black-Scholes (or chosen successor) implementation in Solidity. Asset-agnostic — takes spot, strike, IV, time as inputs.
 
-  - IVOracle: aggregates FTSO realised vol, OI-weighted IV, LP overrides into a current IV surface per (asset, numéraire, maturity).
+  - IVOracle: aggregates FTSO realised vol, OI-weighted IV, LP overrides into a current IV surface per (underlying, yardstick, maturity). The surface depends on the pricing yardstick, not the settlement currency.
 
   - All math via fixed-point library (PRBMath or similar). Floating point is not an option.
 
@@ -366,13 +380,13 @@ The architecture is asset-agnostic by design — adding FBTC, sFLR, or stXRP lat
 
 ## 7.5 Rail Factory
 
-  - RailFactory: deploys new (asset, numéraire, strike, maturity) rails on demand. Permissionless within curated calendar, approved-asset list, and approved-numéraire list.
+  - RailFactory: deploys new (underlying, yardstick, settlement-currency, strike, maturity) rails on demand. Permissionless within the curated calendar and approved lists.
 
-  - Each rail = (CCVault | CSPVault) + (Pricer reference, with quanto mode if non-stable numéraire) + (Settlement reference) + (asset config) + (numéraire config). Composable, upgradable, isolated.
+  - Each rail = (CCVault | CSPVault) + (Pricer reference, quanto mode when settlement currency differs from yardstick) + (Settlement reference) + (underlying config) + (yardstick config) + (settlement-currency config). Composable, upgradable, isolated.
 
-  - Adding FBTC in Phase 2: new asset config, FTSO pair binding, vault deployment. No changes to OptionPricer core (quanto-mode toggle handles non-stable numéraires).
+  - Adding FBTC in Phase 2: new underlying config, FTSO pair binding, vault deployment. No changes to OptionPricer core (the quanto-mode toggle handles coin-settled and cross-asset-yardstick rails).
 
-  - Approved numéraires for Phase 1: USDT0 (default). FXRP enabled at deployment as opt-in sovereign rails. FBTC and FLR added when their FAsset volume validates.
+  - Phase 1 approved lists: yardstick USD (default); settlement currency USDT0 (default) with FXRP enabled as opt-in coin-settled rails. FXRP-as-yardstick for non-XRP underliers (FBTC, FLR) added when their FAsset volume validates.
 
 ## 7.6 Strategy Vault Interface
 
@@ -436,15 +450,15 @@ Five candidate strategies.
 
 The venue ships reference implementations, then invites third-party curators to clone, customise, and compete on them.
 
-|                        |                                                                       |                                  |
-| ---------------------- | --------------------------------------------------------------------- | -------------------------------- |
-| **Archetype**          | **Strategy**                                                          | **Target user**                  |
-| **Conservative Yield** | OTM CCs only, FXRP/FBTC, monthly maturities                           | Bag-holders, treasury            |
-| **Premium Income**     | Near-the-money CCs + CSPs, balanced delta                             | Yield-seekers, mid-cap           |
-| **Accumulation**       | CSPs only, target entry below spot                                    | Cash-holders, accumulators       |
-| **Collar**             | CC + protective put, defined risk band                                | Conservative institutions        |
-| **Vol-Regime Curated** | Strategy adjusts to IV regime (rule-based or AI)                      | Sophisticated DeFi users         |
-| **XRP-Sovereign**      | FXRP-denominated rails only — strike, premium, settlement all in FXRP | Stablecoin-skeptical XRP holders |
+|                        |                                                                                    |                                  |
+| ---------------------- | ---------------------------------------------------------------------------------- | -------------------------------- |
+| **Archetype**          | **Strategy**                                                                       | **Target user**                  |
+| **Conservative Yield** | OTM CCs only, FXRP/FBTC, monthly maturities                                        | Bag-holders, treasury            |
+| **Premium Income**     | Near-the-money CCs + CSPs, balanced delta                                          | Yield-seekers, mid-cap           |
+| **Accumulation**       | CSPs only, target entry below spot                                                 | Cash-holders, accumulators       |
+| **Collar**             | CC + protective put, defined risk band                                             | Conservative institutions        |
+| **Vol-Regime Curated** | Strategy adjusts to IV regime (rule-based or AI)                                   | Sophisticated DeFi users         |
+| **FXRP-Sovereign**     | Coin-settled rails: collateral and premium in FXRP, USD strike, no stablecoin held | Stablecoin-skeptical XRP holders |
 
 Reference implementations bootstrap the ecosystem. Third-party curators (Sentora, others) extend it.
 
@@ -484,15 +498,15 @@ The historical record on AI-driven trading on-chain is mixed.
 
 The RFP recognises the category, builds for it, stays neutral on the prediction.
 
-## 8.5 Sentora as integrated partner
+## 8.5 Sentora and Firelight as integrated partners
 
-Sentora has been mentioned twice in this document — as a candidate for the insurance layer (Section 10.2) and as a curated-vault provider.
+The Flare ecosystem already has specialised players for the two roles this venue depends on. Sentora builds curation and valuation infrastructure. Firelight runs a coverage protocol.
 
-Combining both into a single relationship deserves exploration.
+The venue composes them rather than rebuilding either. Sentora curates the strategy vaults (Sections 8.1 to 8.4). Firelight underwrites the tail-risk insurance layer (Section 10.2).
 
-A curator that also underwrites tail-risk insurance for its own vaults aligns incentives in a way pure third-party insurance cannot.
+Keeping the two roles with separate specialists avoids a structural conflict: a curator that insured its own vaults would be marking its own homework. Separation of concerns is the stronger design.
 
-This is a conversation to open in the RFP response phase, not a precondition for the build.
+Both relationships are conversations to open in the RFP response phase, not preconditions for the build.
 
 # 9. Capital Requirements
 
@@ -536,9 +550,9 @@ Three credible paths. None are exclusive.
 
 Open question: is there a viable insurance product for LP losses on extreme tail events?
 
-@sentora to be approached on two fronts simultaneously: as curated-vault partner (Section 8.5) and as insurance underwriter.
+Two parties to approach: @sentora as curated-vault partner (Section 8.5), and @firelightfi as insurance underwriter.
 
-The combined relationship — a curator that underwrites tail-risk insurance on its own vaults — is structurally different from third-party insurance and should be evaluated before defaulting to standalone insurance.
+Keeping curation and coverage with separate specialists, Sentora for strategy and Firelight for tail-risk underwriting, avoids the conflict of a curator insuring its own book.
 
 Mechanism options regardless: pooled reserve, third-party underwriter, on-chain mutual.
 
@@ -584,17 +598,17 @@ Minimum baseline: geo-block US and UK at the frontend, no KYC for permissionless
 
 Open: legal wrapper for any token issuance, treatment under MiCA Article 4.
 
-## 10.6 Numéraire choice and approved-list governance
+## 10.6 Yardstick, settlement currency, and approved-list governance
 
-Phase 1 default is USDT0 across all rails. The architecture (Section 6.1, 7.5) supports parallel deployment of XRP-denominated rails from day one.
+Phase 1 default is USD-priced, USDT0-settled across all rails. The architecture (Section 6.1.1) separates pricing yardstick from settlement currency and supports coin-settled and FXRP-yardstick rails from day one.
 
 Three open questions for the community:
 
-13. Does Phase 1 launch with USDT0-rails only, or with USDT0 + FXRP rails in parallel? Risk on parallel: liquidity fragmentation (Failure Mode 11.11). Risk on sequential: missing the sovereignty-thesis user segment from day one.
+13. Does Phase 1 launch USDT0-settled only, or also coin-settled (FXRP) rails in parallel? Risk on parallel: liquidity fragmentation (Failure Mode 11.11). Risk on sequential: missing the sovereignty segment at launch.
 
-14. Who governs the approved-numéraire list? Foundation, DAO vote, builder-team, no-curation? Each path has different latency and capture risk.
+14. Who governs the approved yardstick and settlement-currency lists? Foundation, DAO vote, builder-team, no-curation? Each path has different latency and capture risk.
 
-15. How are reference vaults (Section 8.2) split across numéraires? One "XRP-Sovereign" archetype is in the table; should there be sovereign variants of the other archetypes too, or do we let curators self-organise?
+15. How are reference vaults (Section 8.2) split across settlement currencies? One "FXRP-Sovereign" archetype is in the table; should there be coin-settled variants of the other archetypes too, or do we let curators self-organise?
 
 Comparable: Deribit runs both stable-margined and coin-margined options on BTC/ETH in parallel, with sophisticated MMs arbitraging between them. This requires institutional MM presence the venue does not have at Phase 1 launch. The decision is whether to wait for that presence or accept thinner cross-numéraire arbitrage initially.
 
@@ -682,19 +696,19 @@ Clear UI labelling that depositors transact with the curator, not the venue.
 
 Falsification: if no whitelisting framework can be designed that doesn't recreate Hugo-style gatekeeping, this entire layer is suspect.
 
-## 11.11 Numéraire fragmentation
+## 11.11 Configuration fragmentation
 
-Parallel USDT0-rails and FXRP-rails (Section 6.1.1) split per-rail Open Interest. Buyer-Drought (Failure Mode 11.1) compounds: thin buyer-side flow on each rail produces wide spreads, LPs underwrite at adverse selection, both rails enter death-spiral simultaneously.
+Parallel rail configurations (USDT0-settled and FXRP-settled, or multiple yardsticks — Section 6.1.1) split per-rail Open Interest. Buyer drought (Failure Mode 11.1) compounds: thin buyer-side flow on each rail produces wide spreads, LPs underwrite at adverse selection, parallel rails enter death-spiral simultaneously.
 
 Mitigation candidates:
 
-  - Phase 1 launch with USDT0-rails only. FXRP-rails enabled architecturally (RailFactory accepts the deployment) but the venue's reference frontend and Curated-Vault archetypes default to USDT0-rails until USDT0-rail volume validates.
+  - Phase 1 launch USDT0-settled only. Coin-settled rails enabled architecturally (RailFactory accepts the deployment) but the venue's reference frontend and Curated-Vault archetypes default to USDT0-settled until volume validates.
 
-  - Liquidity-gating: FXRP-rails require a minimum LP commitment threshold before they activate. Below threshold, the rails sit deployed but inactive.
+  - Liquidity-gating: alternative-configuration rails require a minimum LP commitment threshold before they activate. Below threshold, the rails sit deployed but inactive.
 
-  - Cross-numéraire MM incentives: protocol-fee rebate for market makers who quote both numéraires for the same (asset, strike, maturity). Bridges the parallel markets without forcing users into one.
+  - Cross-rail MM incentives: protocol-fee rebate for market makers who quote multiple settlement currencies for the same (underlying, yardstick, strike, maturity). Bridges the parallel markets without forcing users into one.
 
-Falsification: if cross-numéraire arbitrage cannot be incentivised cheaply enough to keep both rails functional, the dual-numéraire architecture is a Phase 2/3 feature, not a Phase 1 feature.
+Falsification: if cross-rail arbitrage cannot be incentivised cheaply enough to keep parallel configurations liquid, multi-configuration rails are a Phase 2/3 feature, not a Phase 1 feature.
 
 # 12. Sources and Context
 
