@@ -5,7 +5,7 @@
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
 **Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 14 — community review
+**Status:** Draft 15 — community review
 **Date:** 3 May 2026
 
 ---
@@ -432,6 +432,8 @@ Phase 2/3 asset additions trigger incremental audit scoped to the asset-specific
 
 Curator strategy contracts are out of scope for venue audits — curator-side audits are the curator's responsibility.
 
+Audit cost is path-dependent (Section 10.1). A fork of a proven codebase (Lyra v2) inherits audit heritage; the review narrows to the Flare-specific surface, which is cheaper but also where the real risk concentrates — a fork on a new oracle and new collateral is materially different from the audited original. A greenfield build needs the full cycle. Licensing from Derive may include shared audit artifacts that reduce both cost and risk.
+
 # 8. Curated Vault Layer
 
 A curated vault aggregates depositor capital and deploys it through the venue's primitives under a defined strategy.
@@ -530,17 +532,17 @@ Both relationships are conversations to open in the RFP response phase, not prec
 
 # 9. Capital Requirements
 
-|                                     |                 |                                            |
-| ----------------------------------- | --------------- | ------------------------------------------ |
-| **Item**                            | **Range (USD)** | **Note**                                   |
-| **Initial LP for option quoting**   | 1M – 10M        | Bootstrap from incentive pool + private LP |
-| **Development (12–18 months)**      | 500K – 2M       | Smart contract + frontend + ops            |
-| **Audits (3 rounds)**               | 150K – 600K     | Sequential, not parallel                   |
-| **Marketing / GTM**                 | 100K – 500K     | Phase 1 lean, scale post-launch            |
-| **Reference vault implementations** | 75K – 200K      | 5 archetypes (Section 8.2)                 |
-| **Insurance reserve (optional)**    | TBD             | See Section 10.2 — Sentora                 |
-| **Phase 2 increment (FBTC add)**    | 150K – 400K     | Audit + integration only                   |
-| **Total ex-LP (Phase 1)**           | 825K – 3.3M     |                                            |
+|                                     |                                        |                                            |
+| ----------------------------------- | -------------------------------------- | ------------------------------------------ |
+| **Item**                            | **Range (USD)**                        | **Note**                                   |
+| **Initial LP for option quoting**   | 1M – 10M                               | Bootstrap from incentive pool + private LP |
+| **Development (12–18 months)**      | 500K – 2M                              | Smart contract + frontend + ops            |
+| **Audits**                          | Fork: \<150K / Greenfield: 150K – 600K | Path-dependent — see 7.7 and 10.1          |
+| **Marketing / GTM**                 | 100K – 500K                            | Phase 1 lean, scale post-launch            |
+| **Reference vault implementations** | 75K – 200K                             | 5 archetypes (Section 8.2)                 |
+| **Insurance reserve (optional)**    | TBD                                    | See Section 10.2 — Sentora                 |
+| **Phase 2 increment (FBTC add)**    | 150K – 400K                            | Audit + integration only                   |
+| **Total ex-LP (Phase 1)**           | 825K – 3.3M                            |                                            |
 
 Funding sources to evaluate:
 
@@ -549,6 +551,8 @@ Funding sources to evaluate:
   - Private LP from Flare-native treasuries
 
   - Optional protocol token launch tied to LP participation
+
+Builder-sourced estimate (May 2026): a Flare builder (@flareforward) costed a lean fork-path build at roughly $400K development, audit under $100K, and \~$250K to bootstrap day-1 liquidity. That floor sits well within reach of the incentive pool. The constraint is allocation will, not capital.
 
 # 10. Open Questions for Builders and Community
 
@@ -564,7 +568,7 @@ Three credible paths. None are exclusive.
 
 11. Greenfield protocol: new team, purpose-built. Maximum design freedom. Slowest path.
 
-12. Lyra v2 / Premia v3 fork: proven codebase, faster than greenfield, requires Flare adaptation (FTSO integration, USDT0 anchor, FAsset compatibility).
+12. Lyra v2 / Premia v3 fork: proven codebase, faster than greenfield, requires Flare adaptation (FTSO integration, USDT0 anchor, FAsset compatibility). Audit scope narrows to the adaptation surface, materially cheaper than a greenfield multi-audit cycle. Licensing from Derive (vs. open-source fork) may add shared audit artifacts and support.
 
 ## 10.2 Insurance layer
 
