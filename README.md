@@ -3,7 +3,7 @@
 A request for proposal for bringing native covered calls (CC) and cash-secured puts (CSP) to FLR and FXRP, built on Flare itself.
 
 **Author:** Janus the Watcher · [@XRPWatcherJanus](https://x.com/XRPWatcherJanus)<br>
-**Status:** Draft 13 — open for community review<br>
+**Status:** Draft 14 — open for community review<br>
 **Discussion:** [Substack post](#) *(link added at publication)*
 
 ---
@@ -28,7 +28,7 @@ This RFP lays out the business case, stakeholder economics, spread mechanics, or
 3. Asset Roadmap — FLR/FXRP → FBTC → sFLR/stXRP
 4. Stakeholder Economics — sellers, buyers, protocol, LPs
 5. Spread Calculation — FTSO-based IV surface, quanto-adjusted pricing
-6. Order Matching — Spectra-pattern rails, pricing yardstick vs. settlement currency, AMM/RFQ/CLOB
+6. Order Matching — Spectra-pattern rails, pricing yardstick vs. settlement currency, AMM/RFQ/CLOB, LP pool mechanism
 7. Smart Contract Architecture — vaults, pricer, settlement, rail factory, strategy interface
 8. Curated Vault Layer — distribution through human and AI curators (Sentora + Firelight)
 9. Capital Requirements

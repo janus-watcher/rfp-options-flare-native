@@ -5,7 +5,7 @@
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
 **Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 13 — community review
+**Status:** Draft 14 — community review
 **Date:** 3 May 2026
 
 ---
@@ -339,6 +339,26 @@ Three matching architectures, each with a clean fit case:
 Recommendation for Phase 1: AMM with RFQ overlay for trades above a notional threshold (e.g., $50K).
 
 CLOB deferred until volume justifies professional MM onboarding. This mirrors the path Lyra and Premia took.
+
+## 6.3 Liquidity provision: the pool as counterparty
+
+The AMM path runs on a liquidity pool that is the counterparty to every trade. LP economics live here, and they are worth stating as one mechanism rather than scattering them across the document.
+
+  - LPs deposit capital: USDT0 on stable rails, the FAsset itself on coin-settled rails. The pool quotes a bid and an ask around theoretical IV, sourced from FTSO (Section 5).
+
+  - The pool stands opposite both buyers and writers. Its income is the spread and trading fees it captures on flow, plus net premium on whatever position it carries. It holds the net Greek exposure and hedges it dynamically, via SparkDEX Eternal or spot.
+
+  - LPs are paid for risk, not for nothing. Spread and premium compensate adverse selection and inventory exposure. A kill-switch and an IV circuit-breaker cap the downside (Section 4.5).
+
+Curated vaults (Section 8) layer on top. They aggregate retail and mid-cap LP into single deposits and run defined CC and CSP strategies. The depositor supplies collateral, the curator runs the strategy, premium and fees flow back to the depositor.
+
+The boundary that matters: this mechanism scales the supply of options. It does not create demand.
+
+A pool can write options without limit. If no one buys them, LPs end up holding the underlying with no premium income (Failure Mode 11.1, buyer drought). Ribbon and Thetanuts industrialised option writing without solving demand; oversupply crushed premiums, and depositor yields collapsed.
+
+Two consequences follow. Quote both sides: an AMM that quotes bid and ask earns the spread on any trade, regardless of direction, which decouples LP income from one-directional buyer flow. And pair writing with buyer acquisition: subsidise buyer fees early (Section 11.1) and treat the buy-side flow ratio as a primary health metric.
+
+The LP mechanism makes the supply side elegant and scalable. The binding constraint stays on the demand side.
 
 # 7. Smart Contract Architecture
 
