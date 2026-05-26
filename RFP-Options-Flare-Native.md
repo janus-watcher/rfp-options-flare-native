@@ -5,7 +5,7 @@
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
 **Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 16 — community review
+**Status:** Draft 18 — community review
 **Date:** 3 May 2026
 
 ---
@@ -309,6 +309,10 @@ The pricing yardstick is the unit the strike and premium are quoted in. It must 
 
 The settlement currency is what collateral is posted in and premium is paid in. It is independent of the yardstick. A USD-priced option can settle in FXRP. That is coin-margining, exactly what Deribit runs alongside stable-margined options for BTC and ETH.
 
+On the stablecoin side, USDT0 is the Phase 1 default — live and liquid on Flare today. RLUSD, Ripple's regulated stablecoin, is the ecosystem-aligned alternative: an XRP-ecosystem options venue settling in the XRP ecosystem's own dollar.
+
+The caveat is availability. As of May 2026 RLUSD is live on XRPL and Ethereum and expanding to Ethereum L2s (Base, Optimism, Unichain, Ink) via Wormhole, but not yet on Flare. The architecture lists RLUSD as an approved settlement currency that activates if and when it bridges to Flare. A Flare-native options venue is itself a demand argument for that bridge.
+
 Why this matters: the sovereignty thesis lives on the settlement axis, not the pricing axis. A holder who refuses stablecoin posts FXRP, collects premium in FXRP, and never touches USDT0, even while the strike references USD for a clean surface. No stablecoin is held or settled, only referenced as a measuring stick.
 
 FXRP can also be the yardstick itself, but only for non-XRP underliers. FBTC priced in FXRP, FLR priced in FXRP, FDOGE priced in FXRP: these are genuine volatility markets, because the cross-rate moves. Used this way, FXRP becomes the unit of account of the Flare options economy, the reserve asset other FAssets are quoted against. Every such rail generates FXRP demand and velocity, feeding the fee-burn and FIRE flywheel the FLR thesis depends on.
@@ -362,6 +366,30 @@ Two consequences follow. Quote both sides: an AMM that quotes bid and ask earns 
 
 The LP mechanism makes the supply side elegant and scalable. The binding constraint stays on the demand side.
 
+## 6.4 Trading lifecycle and product phases
+
+These phases describe the trading product's maturity. They are orthogonal to the asset roadmap (Section 3): asset phases add underliers (FBTC, sFLR), product phases add trading sophistication. Both advance independently, each gated by its own validation.
+
+### 6.4.1 Phase 1 — Primary trading
+
+Positions are opened and closed against the venue's liquidity (Section 6.3). A writer exits by buying the position back; a buyer exits by selling it back. Two-sided, pool-mediated. This is the launch scope.
+
+### 6.4.2 Phase 2 — Secondary market for positions
+
+Each open position is represented by a transferable receipt token (ERC-1155, keyed to the rail and strike). A secondary AMM lets holders trade these position tokens peer-to-peer, not just close against the pool.
+
+The use case: a writer sold a covered call Monday; by Wednesday the underlying dropped, theta decayed the option toward worthless, and the writer wants out to free capital for the next trade. Instead of waiting for expiry, they sell the position to someone who wants the cheap downside-tail exposure as a hedge. Time decay (theta) and volatility (vega) become tradeable before expiry. That is what Pendle and Spectra do for yield, applied to options.
+
+Precision: this is option-position tokenisation, not "derivatives of derivatives." The option is already the derivative; Phase 2 makes the position liquid and transferable before expiry.
+
+Honest caveat: a secondary market does not eliminate illiquidity, it relocates it. The secondary AMM needs its own liquidity; if it is thin, the exit is thin. It also compounds buyer drought (Failure Mode 11.1) by requiring flow on both the primary and secondary markets. Phase 2 ships only after Phase 1 primary volume validates.
+
+### 6.4.3 Phase 3 — Structured and second-order (frontier)
+
+Genuine second-order instruments: stripping an option into its two separately tradeable components, time value (theta) and volatility (vega). This is the Pendle/Spectra yield-stripping pattern applied to optionality. Compound options (options on options) sit here too.
+
+This is exotic, hard, and unproven on-chain at scale. It is a research direction, not a commitment. Phase 3 is conditional on a liquid, validated Phase 2, and named here only so the architecture is built to not preclude it.
+
 # 7. Smart Contract Architecture
 
 Five core contract domains. Each independently auditable, each replaceable behind an upgrade path.
@@ -408,7 +436,7 @@ The architecture is asset-agnostic by design — adding FBTC, sFLR, or stXRP lat
 
   - Adding FBTC in Phase 2: new underlying config, FTSO pair binding, vault deployment. No changes to OptionPricer core (the quanto-mode toggle handles coin-settled and cross-asset-yardstick rails).
 
-  - Phase 1 approved lists: yardstick USD (default); settlement currency USDT0 (default) with FXRP enabled as opt-in coin-settled rails. FXRP-as-yardstick for non-XRP underliers (FBTC, FLR) added when their FAsset volume validates.
+  - Phase 1 approved lists: yardstick USD (default); settlement currency USDT0 (default), FXRP for opt-in coin-settled rails, and RLUSD added once it reaches Flare. FXRP-as-yardstick for non-XRP underliers (FBTC, FLR) added when their FAsset volume validates.
 
 ## 7.6 Strategy Vault Interface
 
@@ -636,7 +664,9 @@ Three open questions for the community:
 
 14. Who governs the approved yardstick and settlement-currency lists? Foundation, DAO vote, builder-team, no-curation? Each path has different latency and capture risk.
 
-15. How are reference vaults (Section 8.2) split across settlement currencies? One "FXRP-Sovereign" archetype is in the table; should there be coin-settled variants of the other archetypes too, or do we let curators self-organise?
+15. RLUSD as settlement currency is ecosystem-aligned but not yet on Flare (Ripple's 2026 expansion targets Ethereum L2s, not Flare). Open: launch USDT0-only and add RLUSD when it bridges, or actively make the case to Ripple for an RLUSD-on-Flare deployment, with this venue as the demand driver?
+
+16. How are reference vaults (Section 8.2) split across settlement currencies? One "FXRP-Sovereign" archetype is in the table; should there be coin-settled variants of the other archetypes too, or do we let curators self-organise?
 
 Comparable: Deribit runs both stable-margined and coin-margined options on BTC/ETH in parallel, with sophisticated MMs arbitraging between them. This requires institutional MM presence the venue does not have at Phase 1 launch. The decision is whether to wait for that presence or accept thinner cross-numéraire arbitrage initially.
 
