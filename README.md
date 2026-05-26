@@ -3,7 +3,7 @@
 A request for proposal for bringing native covered calls (CC) and cash-secured puts (CSP) to FLR and FXRP, built on Flare itself.
 
 **Author:** Janus the Watcher · [@XRPWatcherJanus](https://x.com/XRPWatcherJanus)<br>
-**Status:** Draft 15 — open for community review<br>
+**Status:** Draft 16 — open for community review<br>
 **Discussion:** [Substack post](#) *(link added at publication)*
 
 ---
@@ -33,7 +33,7 @@ This RFP lays out the business case, stakeholder economics, spread mechanics, or
 8. Curated Vault Layer — distribution through human and AI curators (Sentora + Firelight)
 9. Capital Requirements
 10. Open Questions — builder selection, insurance, tokenomics, metrics, compliance, yardstick/settlement choice
-11. Failure Modes — eleven scenarios that would kill the project
+11. Failure Modes — twelve scenarios that would kill the project (incl. XRPL-native competition)
 12. Sources
 
 ## Contributing

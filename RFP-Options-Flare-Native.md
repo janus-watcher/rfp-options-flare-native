@@ -5,7 +5,7 @@
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
 **Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 15 — community review
+**Status:** Draft 16 — community review
 **Date:** 3 May 2026
 
 ---
@@ -350,6 +350,8 @@ The AMM path runs on a liquidity pool that is the counterparty to every trade. L
 
   - LPs are paid for risk, not for nothing. Spread and premium compensate adverse selection and inventory exposure. A kill-switch and an IV circuit-breaker cap the downside (Section 4.5).
 
+  - Capital efficiency: the pool should support concentrated, tick-based liquidity (Uniswap v3 / XRPL XLS-Curves style), not uniform constant-product depth. LPs target a price band, yielding far more usable depth per unit deposited. Use structured tick keys, not bitmaps; the Raydium bitmap vulnerability is the cautionary precedent.
+
 Curated vaults (Section 8) layer on top. They aggregate retail and mid-cap LP into single deposits and run defined CC and CSP strategies. The depositor supplies collateral, the curator runs the strategy, premium and fees flow back to the depositor.
 
 The boundary that matters: this mechanism scales the supply of options. It does not create demand.
@@ -640,7 +642,7 @@ Comparable: Deribit runs both stable-margined and coin-margined options on BTC/E
 
 # 11. Failure Modes
 
-Eleven scenarios that would kill this project. Listed in descending order of likelihood.
+Twelve scenarios that would kill this project. Listed in descending order of likelihood.
 
 Mitigations are first drafts, not solutions.
 
@@ -735,6 +737,24 @@ Mitigation candidates:
   - Cross-rail MM incentives: protocol-fee rebate for market makers who quote multiple settlement currencies for the same (underlying, yardstick, strike, maturity). Bridges the parallel markets without forcing users into one.
 
 Falsification: if cross-rail arbitrage cannot be incentivised cheaply enough to keep parallel configurations liquid, multi-configuration rails are a Phase 2/3 feature, not a Phase 1 feature.
+
+## 11.12 XRPL-native options
+
+XRPL is adding pluggable AMM curves (XLS AMM Swappable Curves, draft May 2026): concentrated liquidity and StableSwap now, a programmable Smart AMM (WASM pools, lifecycle hooks) planned. A mature Smart AMM could host options on XRPL directly, bypassing the Flare-via-FXRP route. This is the most credible long-term threat to the thesis, and dismissing it would be dishonest.
+
+Why it does not break the thesis today:
+
+  - Smart AMM is deferred to a separate, unsupported amendment, dependent on a WASM runtime and module-caching infrastructure the spec itself flags as not yet viable for per-swap execution. Years out, multiple dependencies.
+
+  - The curves shipping now (concentrated liquidity, StableSwap) are spot primitives. A swap curve is not an options venue: no strike, expiry, settlement, or Greeks.
+
+  - XRPL has no native high-frequency oracle. The oracle-cost problem that burdens Ethereum options returns on XRPL. Flare's FTSO is the structural edge XRPL cannot replicate.
+
+  - XRPL transactions are not composable intra-transaction (its own flash-loan resistance). Options need atomic composition: position plus hedge, liquidation plus settlement. EVM-based Flare provides it; XRPL structurally restricts it.
+
+Mitigation: ship while the window is open. The Flare-native advantage is largest now and compresses as XRPL's AMM matures.
+
+Falsification: if XRPL Smart AMM launches with a working high-frequency oracle and composable hooks before a Flare-native venue reaches mainnet, the structural case weakens materially.
 
 # 12. Sources and Context
 
