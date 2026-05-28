@@ -5,7 +5,7 @@
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
 **Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 18 — community review
+**Status:** Draft 19 — community review
 **Date:** 3 May 2026
 
 ---
@@ -582,7 +582,17 @@ Funding sources to evaluate:
 
   - Optional protocol token launch tied to LP participation
 
+  - Foundation as anchor LP: deposit capital directly into the LP pool (Section 6.3), earning spread and fees on flow plus net premium on the position. Durable, productive, incentive-aligned. Caveats and trade-offs in the next paragraphs.
+
 Builder-sourced estimate (May 2026): a Flare builder (@flareforward) costed a lean fork-path build at roughly $400K development, audit under $100K, and \~$250K to bootstrap day-1 liquidity. That floor sits well within reach of the incentive pool. The constraint is allocation will, not capital.
+
+A structurally different funding option deserves explicit naming: the Foundation as anchor LP. Rather than distributing rFLR rewards to attract mercenary liquidity, the Foundation deposits capital directly into the LP pool (Section 6.3). The pool earns the spread and trading fees it captures on flow, plus net premium on whatever position it carries. The Foundation's capital becomes a productive asset that compounds, not a cost line that drains.
+
+Two consequences follow. The TVL becomes durable and incentive-aligned: the capital stays because it earns, and it earns insofar as the venue succeeds. And the flow the position generates feeds the same FIRE/MEV buyback the burn thesis depends on, with the fee revenue captured by an aligned holder rather than a mercenary one.
+
+The honest caveats. This puts the Foundation on the principal-risk side of options underwriting (real tail-event exposure, not just dilution). It picks a winner, where rFLR distribution is mechanism-neutral. It raises a conflict of interest (Foundation as governor and LP in the same venue) that requires explicit governance and disclosure. And it does not replicate rFLR's broad onboarding effect, which seeds users and attention a single anchor deposit cannot.
+
+The realistic shape is a hybrid: anchor LP positions in a small number of high-conviction venues, with broad rFLR distribution scaled to the bodies in the room. This is the prescription that follows from the rented-TVL critique (see Janus, "Rented Deflation," 2026): own the productive infrastructure rather than paying mercenaries to rent it. The same litmus applies to both diagnosis and prescription. If the venue requires subsidy to produce its flow, the loop has only relocated.
 
 # 10. Open Questions for Builders and Community
 
