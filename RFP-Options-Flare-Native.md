@@ -526,7 +526,9 @@ This document treats it as an evaluated path, not a decision.
 
 ### Why it is material for an options venue specifically
 
-**Quote privacy.** The dominant objection a market maker raises to on-chain options is not gas; it is that resting quotes are public and get picked off. A maker quoting a full surface — four expiries by twenty strikes by two sides is roughly 160 instruments — prices that exposure into the spread or declines to quote at all. In-enclave matching removes book-level MEV and front-running on resting orders.
+**Quote privacy.** The dominant objection a market maker raises to on-chain options is not gas; it is that resting quotes are public and get picked off. A maker quoting a full surface faces expiries times strikes times two sides. On Derive in November 2026 that is five maturities on XRP, nine on HYPE and twelve on BTC; at roughly twenty strikes a side, somewhere between 200 and 480 separate books. Every resting quote visible, every one of them pickable. The maker prices that exposure into the spread or declines to quote at all.
+
+Note the progression. The instrument count more than doubles between a new listing and a major, which means fragmentation scales with success: the better a venue does, the more maturities it lists, and the thinner each individual book becomes. Growth does not dissolve this problem, it compounds it. The only levers are deliberately limiting the surface or cutting the cost of quoting it — both architecture decisions, taken before launch. In-enclave matching removes book-level MEV and front-running on resting orders.
 
 **Requoting cost.** An options maker rewrites quotes across the surface on every meaningful move in spot, because delta hedging requires it. With no per-fill gas and no on-chain settlement round trip, continuous requoting becomes economically possible. On a public chain it is not.
 
