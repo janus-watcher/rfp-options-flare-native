@@ -16,7 +16,7 @@ A covered call in the strict sense — underlier locked, underlier delivered, no
 
 This RFP lays out the business case, stakeholder economics, spread mechanics, order-matching options, smart-contract architecture, and the curated-vault distribution layer for a Flare-native venue. It is intentionally falsifiable — Section 11 lists the thirteen scenarios that would kill the project.
 
-**Draft 20 (November 2026)** revises the competitive case rather than defending it. Rysk has withdrawn from FXRP options, so the "locked-out segment" argument of earlier drafts is void and has been removed. Derive now accepts FXRP as collateral. And the Flare Foundation has published a confidential orderbook reference implementation on FCC, evaluated here as a candidate matching layer. See the changelog at the top of the RFP.
+**Draft 20 (November 2026)** revises the competitive case rather than defending it. Rysk has withdrawn from FXRP options, so the "locked-out segment" argument of earlier drafts is void and has been removed. Derive now accepts FXRP as collateral. The Flare Foundation has published a confidential orderbook reference implementation on FCC, evaluated here as a candidate matching layer. And Dream — a mobile options brokerage routing by RFQ over Derive Chain — now occupies the distribution layer this proposal argues for, at negligible volume. See the changelog at the top of the RFP.
 
 ## What's here
 

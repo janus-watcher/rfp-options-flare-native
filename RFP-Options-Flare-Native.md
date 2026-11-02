@@ -22,6 +22,7 @@ Six months of market movement have invalidated part of Draft 19. Rather than qui
   - **Section 7.8 added.** The Flare Foundation has published a confidential orderbook reference implementation on Flare Confidential Compute. Evaluated here as a candidate matching and custody layer, with its limitations stated.
   - **Section 11.13 added.** Failure modes specific to a TEE-based confidential venue.
   - **Section 6.2 revised.** Confidential CLOB added as a fourth matching architecture; the Phase 1 recommendation is reopened.
+  - **Section 2.3 extended** with Dream, a mobile options brokerage routing by RFQ to institutional makers over Derive Chain — the distribution layer of this proposal's own Section 8 thesis, built by someone else and currently negligible in volume. Section 8.1 corrected accordingly.
   - **Sections 2.4, 9, 10, 11.1 and 12 adjusted** to match.
 
 What has not changed: the product thesis (CC and CSP together, physically covered, FTSO-priced) and the falsifiability standard. What has weakened: the claim that a user segment is locked out. See 2.3.
@@ -112,6 +113,22 @@ Four things survive, and they are narrower than Draft 19 claimed:
 2. **FLR has no options market anywhere.** Not Derive, not Deribit, not CME. Before treating that as an opportunity, consider the likelier cause: a market maker cannot quote what it cannot hedge, and hedging demands a liquid spot or perpetual market in the underlier. This is as much a constraint on the roadmap as an opening.
 3. **No bridge.** Real but weak on its own; the bridges work.
 4. **Distribution and the curated vault layer** (Section 8). Harder to replicate than a listing, and on current evidence the most defensible of the four.
+
+### A second layer: Dream
+
+Derive is where matching happens. A distribution layer is forming above it, and for this proposal that layer matters more.
+
+Dream is a mobile options brokerage. The user picks an asset, a direction, a strike and an expiry. There is no order book of its own; requests are routed by RFQ to institutional market makers, with settlement running in part over Derive Chain. Its app-store pitch is "leverage without liquidations" and self-custody.
+
+That is close to this document's own argument, shipped by someone else: hide the machinery, spare the holder from becoming an options trader, remove liquidation risk.
+
+Two consequences.
+
+It confirms the layering thesis in Section 8. Matching and distribution separate. Whoever builds the venue need not own the customer relationship, and whoever owns the customer relationship need not build the venue.
+
+And it is the sharpest available test of the strongest claim left in 2.3. DefiLlama shows Dream at roughly $7,900 in fees over thirty days, ranked 69th by TVL, effectively 0% of a $206.8m category (November 2026; the protocol's own numbers and DefiLlama disagree, treat as unverified).
+
+If a finished consumer app with institutional liquidity and precisely the right pitch produces that, then "the product form is wrong, fix the form and demand follows" has a live counterexample. The usual rebuttals remain available — too young, wrong assets, no distribution — but they now have to be demonstrated rather than asserted.
 
 ### The uncomfortable evidence
 
@@ -584,7 +601,9 @@ The pattern has not yet been applied to on-chain options at scale. The opening e
 
 ## 8.1 Why curated vaults belong in this RFP
 
-Four structural problems the venue would otherwise own:
+Four structural problems the venue would otherwise own.
+
+Before the list, one correction of emphasis. Draft 19 treated this layer as an advantage the venue could design for. Dream (see 2.3) shows it is also a competitive layer that others occupy independently, and that occupying it is not sufficient on its own — its current volume is negligible. Curation remains the right answer to distribution. It is no longer evidence that distribution is the binding constraint.
 
 6.  Distribution. Most retail and mid-cap users do not want to choose strikes, maturities, or position sizes. They want a yield. A curated vault is the right user-facing product for that segment.
 
@@ -953,6 +972,8 @@ Comparable, historical: Rysk Finance on HyperEVM. Contact form (May 2026) requir
 Comparable, current: Derive (formerly Lyra). XRP options chain: [app.derive.xyz/trade/options?symbol=XRP](https://app.derive.xyz/trade/options?symbol=XRP). Product and collateral documentation: [docs.derive.xyz/docs/supported-products-1](https://docs.derive.xyz/docs/supported-products-1)
 
 Confidential orderbook reference implementation, Flare Foundation: [github.com/flare-foundation/fce-orderbook](https://github.com/flare-foundation/fce-orderbook). Underlying platform: [Flare Confidential Compute overview](https://dev.flare.network/fcc/overview)
+
+Distribution layer: Dream, a mobile options brokerage routing by RFQ to institutional market makers, settling in part over Derive Chain. [DefiLlama — Dream](https://defillama.com/protocol/dream) · [@dreaming](https://x.com/dreaming)
 
 Market size context: on-chain options premium and notional rankings via [DefiLlama](https://defillama.com/options); the 2.4% on-chain-to-Deribit notional ratio for the first nine months of 2026 via [CryptoRank research](https://cryptorank.io/insights/research/onchain-options-premiums-more-than-tripled-in-2026-as-derive-pulled-ahead)
 
