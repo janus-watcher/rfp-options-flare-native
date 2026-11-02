@@ -2,17 +2,21 @@
 
 A request for proposal for bringing native covered calls (CC) and cash-secured puts (CSP) to FLR and FXRP, built on Flare itself.
 
-**Author:** Janus the Watcher · [@XRPWatcherJanus](https://x.com/XRPWatcherJanus)<br>
-**Status:** Draft 19 — open for community review<br>
-**Discussion:** [Substack post](#) *(link added at publication)*
+**Author:** Janus the Watcher · [@WatcherJanus](https://x.com/WatcherJanus)<br>
+**Status:** Draft 20 — open for community review<br>
+**Discussion:** [The Unbuilt Monopoly](https://janusthewatcher.substack.com/p/the-unbuilt-monopoly) on Substack
 
 ---
 
 ## TL;DR
 
-Flare has the primitives for a native options market — FAssets, FTSO, FCC, FDC, and a maturing DeFi stack. Covered calls on FXRP exist only on an external chain (Rysk on HyperEVM); cash-secured puts do not exist at all. The single existing provider gates access behind a $250K minimum allocation.
+Flare has the primitives for a native options market — FAssets, FTSO, FCC, FDC, and a maturing DeFi stack. It has no options market of its own. An FXRP holder who wants premium income has one route today: bridge to Derive, post FXRP as collateral, and write cash-settled options on XRP against a margined position that can be liquidated.
 
-This RFP lays out the business case, stakeholder economics, spread mechanics, order-matching options, smart-contract architecture, and the curated-vault distribution layer for a Flare-native venue. It is intentionally falsifiable — Section 11 lists the eleven scenarios that would kill the project.
+A covered call in the strict sense — underlier locked, underlier delivered, no margin call possible — does not exist for XRP anywhere. For FLR there is no options market at all.
+
+This RFP lays out the business case, stakeholder economics, spread mechanics, order-matching options, smart-contract architecture, and the curated-vault distribution layer for a Flare-native venue. It is intentionally falsifiable — Section 11 lists the thirteen scenarios that would kill the project.
+
+**Draft 20 (November 2026)** revises the competitive case rather than defending it. Rysk has withdrawn from FXRP options, so the "locked-out segment" argument of earlier drafts is void and has been removed. Derive now accepts FXRP as collateral. And the Flare Foundation has published a confidential orderbook reference implementation on FCC, evaluated here as a candidate matching layer. See the changelog at the top of the RFP.
 
 ## What's here
 
@@ -24,16 +28,16 @@ This RFP lays out the business case, stakeholder economics, spread mechanics, or
 ## Structure
 
 1. Executive Summary
-2. Business Case — why options beyond yield, why CC + CSP, the structural opening
+2. Business Case — why options beyond yield, why CC + CSP, the competitive landscape (revised Nov 2026)
 3. Asset Roadmap — FLR/FXRP → FBTC → sFLR/stXRP
 4. Stakeholder Economics — sellers, buyers, protocol, LPs
 5. Spread Calculation — FTSO-based IV surface, quanto-adjusted pricing
 6. Order Matching — Spectra-pattern rails, pricing yardstick vs. settlement currency, AMM/RFQ/CLOB, LP pool mechanism, trading lifecycle (primary / secondary / structured phases)
-7. Smart Contract Architecture — vaults, pricer, settlement, rail factory, strategy interface
+7. Smart Contract Architecture — vaults, pricer, settlement, rail factory, strategy interface, confidential matching on FCC
 8. Curated Vault Layer — distribution through human and AI curators (Sentora + Firelight)
 9. Capital Requirements
-10. Open Questions — builder selection, insurance, tokenomics, metrics, compliance, yardstick/settlement choice
-11. Failure Modes — twelve scenarios that would kill the project (incl. XRPL-native competition)
+10. Open Questions — builder selection, insurance, tokenomics, metrics, compliance, yardstick/settlement choice, confidential matching
+11. Failure Modes — thirteen scenarios that would kill the project (incl. XRPL-native competition and TEE risk)
 12. Sources
 
 ## Contributing

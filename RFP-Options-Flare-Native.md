@@ -4,9 +4,9 @@
 
 *Phase 1: FLR and FXRP · Roadmap: FBTC, sFLR, stXRP*
 
-**Author:** Janus the Watcher ([@XRPWatcherJanus](https://x.com/XRPWatcherJanus))
-**Status:** Draft 19 — community review
-**Date:** 3 May 2026
+**Author:** Janus the Watcher ([@WatcherJanus](https://x.com/WatcherJanus))
+**Status:** Draft 20 — community review
+**Date:** 2 November 2026 (first published 3 May 2026)
 
 ---
 
@@ -14,13 +14,27 @@
 
 ---
 
+## Changelog — Draft 20 (2 November 2026)
+
+Six months of market movement have invalidated part of Draft 19. Rather than quietly patch it, the changes are listed here.
+
+  - **Section 2.3 rewritten.** The original structural argument rested on Rysk gating FXRP options behind a $250K minimum. Rysk no longer offers FXRP options, so that argument is void. Derive now lists a full XRP options chain and accepts FXRP as collateral. The opening is narrower than Draft 19 claimed and is restated accordingly.
+  - **Section 7.8 added.** The Flare Foundation has published a confidential orderbook reference implementation on Flare Confidential Compute. Evaluated here as a candidate matching and custody layer, with its limitations stated.
+  - **Section 11.13 added.** Failure modes specific to a TEE-based confidential venue.
+  - **Section 6.2 revised.** Confidential CLOB added as a fourth matching architecture; the Phase 1 recommendation is reopened.
+  - **Sections 2.4, 9, 10, 11.1 and 12 adjusted** to match.
+
+What has not changed: the product thesis (CC and CSP together, physically covered, FTSO-priced) and the falsifiability standard. What has weakened: the claim that a user segment is locked out. See 2.3.
+
+---
+
 # 1. Executive Summary
 
 Flare has the primitives for a native options market — FAssets, FTSO, FCC, FDC, and a maturing DeFi stack.
 
-Yet covered calls on FXRP exist only on an external chain (Rysk on HyperEVM), and cash-secured puts do not exist at all.
+Yet no options market exists on Flare itself. An FXRP holder who wants premium income has exactly one route today, and it leads off-chain-of-Flare: post FXRP as collateral on Derive and write options on XRP there, cash-settled in USDC, against a margined position that can be liquidated.
 
-The single existing provider for FXRP options has positioned itself as a B2B vault platform with a $250K minimum allocation. Retail and mid-cap holders have no access. Flare-native holders pay bridging cost and cross-chain risk to participate at all.
+That is a different instrument from the one described here. A covered call in the strict sense — underlier locked, underlier delivered, no margin call possible — does not exist for XRP on any venue. For FLR there is no options market at all. This document argues that the gap is one of product form and location, not of access; Section 2.3 states the case and its limits.
 
 This document lays out the business case for building a native options venue on Flare. The launch is structured around the simultaneous deployment of covered calls (CC) and cash-secured puts (CSP), denominated in USDT0 collateral by default, priced through FTSO data, and architected after the Spectra pattern of permissionless per-maturity rails.
 
@@ -48,7 +62,7 @@ Holders who refuse to sell their underlying have no way to monetise time and vol
 
 For FLR and FXRP holders today — and FBTC holders tomorrow — this is not a comfort gap. It is a structural absence in the DeFi stack.
 
-Mature ecosystems (ETH, BTC, SOL) all have on-chain options venues. Flare does not.
+Mature ecosystems (ETH, BTC, SOL) all have on-chain options venues. Flare does not — its holders must bridge to reach one, and what they reach is a margined, cash-settled instrument rather than a covered position (2.3).
 
 ## 2.2 Why CC and CSP belong together
 
@@ -64,28 +78,63 @@ Default collateral anchor: USDT0. Stable, on-chain, accepted as base unit for CS
 
 Settlement currency is a separate axis from the pricing yardstick (Section 6.1.1, Open Question 10.6). Coin-settled rails let holders post collateral and collect premium in FXRP, holding no stablecoin, even when the strike references USD for a clean volatility surface. The market decides which configuration attracts liquidity.
 
-## 2.3 The structural opening
+## 2.3 The competitive landscape (revised November 2026)
 
-Rysk's contact form (May 2026) requires a $250K minimum allocation and a sales-pipeline conversation to access an options vault.
+Draft 19 argued against Rysk: one FXRP options provider, on a foreign chain, behind a $250K minimum and a sales call. A locked-out segment, concentrated on Flare. That argument is void, and the honest move is to say so rather than quietly delete it.
 
-Their tagline reads "We can support any asset and EVM chain." That is not a competing product. That is a B2B treasury service.
+### What changed
 
-The opening for a Flare-native venue:
+**Rysk is out.** It no longer offers FXRP options. The offering was never complete — covered calls only, no cash-secured puts — and is currently unavailable. As a competitor for this use case it has left the field. It remains instructive as an architecture: a vault model on HyperEVM built on Opyn/Gamma, epoch-based, with settlement type configurable per vault (its materials describe cash-settled covered calls and physically settled cash-secured puts — settlement is a configuration choice, not a property of the vault model).
 
-|                     |                             |                                    |
-| ------------------- | --------------------------- | ---------------------------------- |
-| **Dimension**       | **Rysk (HyperEVM)**         | **Flare-Native (RFP Vision)**      |
-| **Access**          | Allocation-gated, $250K min | Permissionless                     |
-| **Setup**           | Sales pipeline              | Self-serve                         |
-| **Asset alignment** | Multi-chain generic         | FAsset-native (FXRP, FBTC) and FLR |
-| **Bridging**        | Required                    | None                               |
-| **Product scope**   | CC live, CSP "in progress"  | CC + CSP from launch               |
-| **Asset roadmap**   | Per sales-call basis        | FLR/FXRP → FBTC → sFLR/stXRP       |
-| **Target user**     | Institutional / treasury    | Retail, mid-cap, treasury          |
+**Derive is in.** Derive (formerly Lyra) lists a full XRP options chain: calls and puts, multiple expiries, strikes well either side of spot, permissionless, no minimum. Since August 2026 FXRP is accepted there as collateral. An FXRP holder can post FXRP and write XRP options today, self-custodial, with no sales conversation and no minimum ticket.
 
-The argument is not "a better Rysk."
+Note the construction, because it is not intuitive: **FXRP is collateral there, not underlier.** The contract references XRP and settles in cash. There is no FXRP options product; there is the ability to pledge FXRP against XRP options.
 
-The argument is: Rysk priced itself out of an entire user segment. That segment is concentrated on Flare.
+So the gate is gone. No segment is locked out by a threshold. Any business case resting on that premise is dead.
+
+### What the opening actually is
+
+|                       |                              |                                 |
+| --------------------- | ---------------------------- | ------------------------------- |
+| **Dimension**         | **Derive (Derive Chain)**    | **Flare-Native (RFP Vision)**   |
+| **Underlier**         | XRP                          | FXRP and FLR                    |
+| **Role of FXRP**      | collateral only              | underlier and collateral        |
+| **Access**            | permissionless, no minimum   | permissionless, no minimum      |
+| **Bridging**          | required                     | none                            |
+| **Settlement**        | cash, European, USDC         | delivery of the underlier       |
+| **Collateral**        | margined, marked to market   | locked                          |
+| **Liquidation risk**  | yes                          | none (fully covered)            |
+| **FLR as underlier**  | not listed                   | yes                             |
+
+Four things survive, and they are narrower than Draft 19 claimed:
+
+1. **Settlement mechanics.** Margined and cash-settled is not the same product as locked and physically delivered. The difference is not the terminal payoff, which is broadly equivalent; it is the path. A margined writer can be liquidated by an intraday move or a volatility spike even when the position would have expired cleanly. A fully covered writer cannot. Whether that distinction is purchase-decisive for the target holder is an open question, not an established fact.
+2. **FLR has no options market anywhere.** Not Derive, not Deribit, not CME. Before treating that as an opportunity, consider the likelier cause: a market maker cannot quote what it cannot hedge, and hedging demands a liquid spot or perpetual market in the underlier. This is as much a constraint on the roadmap as an opening.
+3. **No bridge.** Real but weak on its own; the bridges work.
+4. **Distribution and the curated vault layer** (Section 8). Harder to replicate than a listing, and on current evidence the most defensible of the four.
+
+### The uncomfortable evidence
+
+Observation of the Derive XRP chain (August 2026, one expiry, to be re-measured): visible open interest concentrated on a handful of near-the-money strikes at low six-figure notional; the volume column empty; bid and ask sizes uniform across strikes, the signature of a single market maker; implied volatility pinned to a constant on far strikes, i.e. a model value rather than a price.
+
+Three caveats before anyone concludes from that. The market carries Derive's "NEW" tag and is weeks old, so it has had no opportunity to accumulate flow. Derive also operates an RFQ channel, and trades struck there never appear as resting orders — a thin visible book structurally understates activity. And a snapshot of one expiry is not a usage figure; establishing usage requires active addresses and trade history.
+
+What can be stated with a source: across the first nine months of 2026, combined notional across Derive, Aevo and Paradex came to roughly 2.4% of Deribit's options notional, with Derive holding about 88% of recorded on-chain premiums. On-chain options remain a rounding error against the centralised market.
+
+That figure supports two opposite readings, and this document does not pretend to settle it. Either on-chain options are a niche with an entrenched leader, in which case entry is unattractive. Or the category sits at 2.4% penetration and an 88% share of very little is not a moat.
+
+### The revised claim
+
+This RFP no longer claims that a segment is excluded. It claims something weaker and testable: that the form in which the product is currently offered — margined, cash-settled, on a foreign chain, and operationally demanding to run — may not be the form in which holder demand can be met. Four candidate explanations for the thin book follow from that, and they are not mutually exclusive:
+
+  - demand does not exist (the thesis fails);
+  - the market is too young to judge (measure it);
+  - no one can hedge it, so no one quotes it (Section 6, and fatal for FLR specifically);
+  - the route is too long and the instrument too demanding for the target holder (the thesis holds, and the answer is the vault layer in Section 8, not a better order book).
+
+Separating these four is the single most valuable piece of work anyone could do on this proposal. Section 11.1 carries the failure mode if the first explanation is the right one.
+
+One further datum deserves weight: a provider has already withdrawn from this market. Either the product did not pay for him, which is a warning, or it was his particular shape — minimum size and sales-led distribution — which supports the thesis. That is a research question, not a matter of opinion.
 
 ## 2.4 Lot size: the second moat
 
@@ -93,9 +142,9 @@ Traditional equity options trade in standardised hundred-share contracts. That c
 
 On-chain, a covered call or cash-secured put writes against any fraction of the underlying. The minimum lot is whatever the contract allows, with gas as the only practical floor, not a hundred-unit convention inherited from the trading pit.
 
-This collapses the entry threshold from Rysk's $250K gate to near-dust positions, and expands the addressable market by an order of magnitude.
+This collapses the entry threshold to near-dust positions and expands the addressable market by an order of magnitude relative to any venue that inherits the contract-size convention.
 
-The unserved segment is not only holders below $250K. It is every position size that standardised contract conventions never accommodated. Fractional lot capability is a structural advantage of on-chain settlement that no wrapped or hosted venue inherits for free.
+Two honest qualifications. Fractional lots are no longer a differentiator against Derive, which also imposes no minimum — this is an advantage over traditional venues and over vault products with allocation floors, not over the one on-chain competitor. And a formal absence of minimum size is not the same as economic access: if a venue charges a fixed fee per newly opened position, small tickets are priced out regardless. Fee structure per position, not stated minimums, is the number that matters. Verify it before relying on this moat.
 
 # 3. Asset Roadmap
 
@@ -107,7 +156,7 @@ Launch scope is bounded by demand, audit cost, and oracle coverage rather than d
 
   - FLR — Flare-native, FTSO-priced, broadest holder base, no bridging dependency. Anchor for the sFLR roadmap.
 
-  - FXRP — FAsset-wrapped XRP. Largest current bag-holder pool with no native options access. Highest immediate demand signal (per Rysk's gating evidence in Section 2.3).
+  - FXRP — FAsset-wrapped XRP. Largest current bag-holder pool with no native options access. Largest holder base reachable without a new FAsset integration (see Section 2.3 for the revised competitive picture).
 
 ## 3.2 Phase 2 — FAsset Extension
 
@@ -339,10 +388,13 @@ Three matching architectures, each with a clean fit case:
 | **AMM (Lyra-style)**              | Always-on quoting, retail self-serve, deep tail strikes | LP capital inefficient, vulnerable to toxic flow          |
 | **RFQ (Hegic / Premia v3 style)** | Large-size institutional, lower slippage on big tickets | Quote latency, requires market maker presence             |
 | **CLOB (Schwety pitch)**          | Tightest spreads at-the-money, professional flow        | Cold-start liquidity, requires active market makers (MMs) |
+| **Confidential CLOB (FCC/TEE)**   | Private resting orders, gasless requoting, attested price-time priority | TEE and liveness dependency, no external auditability of the book, risk engine still to build |
 
-Recommendation for Phase 1: AMM with RFQ overlay for trades above a notional threshold (e.g., $50K).
+Draft 19 recommended an AMM with an RFQ overlay above a notional threshold (e.g. $50K), deferring a CLOB until volume justified professional MM onboarding — the path Lyra and Premia took.
 
-CLOB deferred until volume justifies professional MM onboarding. This mirrors the path Lyra and Premia took.
+That recommendation is reopened in Draft 20. The fourth row did not exist when it was written. A confidential CLOB addresses the specific reason market makers avoid on-chain options — public resting quotes and the cost of requoting a full surface — rather than working around it. Section 7.8 evaluates the implementation and its limits.
+
+The RFQ-first observation stands regardless of architecture and is worth stating plainly: a request-for-quote channel is the standard answer to a cold start, because a dealer who need not post standing quotes will engage a market that cannot yet support a book. Derive follows exactly this sequence, labelling its youngest markets "RFQ Only" before giving them an order book. Whatever matching layer is chosen, Phase 1 should be able to run RFQ-first.
 
 ## 6.3 Liquidity provision: the pool as counterparty
 
@@ -464,6 +516,54 @@ Curator strategy contracts are out of scope for venue audits — curator-side au
 
 Audit cost is path-dependent (Section 10.1). A fork of a proven codebase (Lyra v2) inherits audit heritage; the review narrows to the Flare-specific surface, which is cheaper but also where the real risk concentrates — a fork on a new oracle and new collateral is materially different from the audited original. A greenfield build needs the full cycle. Licensing from Derive may include shared audit artifacts that reduce both cost and risk.
 
+## 7.8 Confidential matching: the FCC path
+
+In late 2026 the Flare Foundation published a reference implementation of a confidential orderbook built on Flare Confidential Compute: [flare-foundation/fce-orderbook](https://github.com/flare-foundation/fce-orderbook).
+
+Matching runs inside a TEE. Resting orders exist only in enclave memory — never on-chain, never in a public mempool. An on-chain vault holds the tokens and releases them only against a signature from the TEE, whose code hash is registered on-chain and cannot be swapped silently. It ships with price-time priority matching, deposit and withdrawal custody, a working frontend, a load-testing harness, and XRPL wallet onboarding (Xaman) through Flare Smart Accounts. The repository positions itself explicitly as a template for "exchanges, structured-product vaults, settlement layers."
+
+This document treats it as an evaluated path, not a decision.
+
+### Why it is material for an options venue specifically
+
+**Quote privacy.** The dominant objection a market maker raises to on-chain options is not gas; it is that resting quotes are public and get picked off. A maker quoting a full surface — four expiries by twenty strikes by two sides is roughly 160 instruments — prices that exposure into the spread or declines to quote at all. In-enclave matching removes book-level MEV and front-running on resting orders.
+
+**Requoting cost.** An options maker rewrites quotes across the surface on every meaningful move in spot, because delta hedging requires it. With no per-fill gas and no on-chain settlement round trip, continuous requoting becomes economically possible. On a public chain it is not.
+
+**Market structure.** Price-time priority enforced by attested code approaches the quoting discipline of a regulated venue — the property Section 6 identifies as structurally absent from permissionless venues — without a central operator.
+
+**Onboarding.** XRPL wallets connect directly via Smart Accounts, with a deterministic EVM account derived from the r-address. For a venue whose target user is an XRP holder, that removes a step this document has otherwise treated as unavoidable friction.
+
+**Governance path.** The template comes from the Foundation itself. Section 11.5 treats Foundation gating as a failure mode; a Foundation-published exchange reference changes that calculation.
+
+### What it does not solve
+
+**Liquidity.** Private quoting makes market making cheaper and safer. It does not produce a market maker. Every cold-start consideration in Section 6 stands unchanged.
+
+**Hedgeability.** Unaffected. The FLR constraint named in 2.3 is untouched by matching architecture.
+
+**The risk engine.** The repository provides matching, custody, deposits and withdrawals. It does not provide margin computation, expiry settlement against an oracle, cross-strike netting, or liquidation. For an options venue that is the hard part and the expensive part. Treat FCE as roughly the matching and custody third of the stack, not the stack.
+
+**Ordering.** The documentation is explicit: FCC is fire-and-forget, two direct actions may arrive in either order, and the engine is single-writer per pair. Multi-leg strategies, atomic spreads and cross-instrument risk checks must be designed without ordering assumptions. For an options venue that is a live design constraint, not a footnote.
+
+**Liveness.** A sustained proxy outage halts new trading. Withdrawals remain recoverable through the consensus-signed on-chain instruction path. For instruments that lose time value daily and must be rolled, a trading outage is a real loss.
+
+**Maturity.** This is a reference implementation, not a production venue, and its audit status for this use case is unestablished.
+
+### The trade-off nobody names
+
+Confidentiality and auditability pull against each other.
+
+If resting orders live only in enclave memory, the book cannot be measured from outside. No third party can assess quote quality, maker concentration, or wash trading. Settled positions and vault flows remain on-chain, so the loss is bounded to the order layer — but the on-chain thesis in Section 2.1 leans on public verifiability, and any claim that such a venue is "transparent" would need that qualification attached.
+
+There is an irony worth stating. The property that makes the architecture attractive to market makers is the same property that removes the analyst's ability to verify the market is healthy. A prospective LP or curator may find that a harder trade than the MEV it prevents.
+
+### Open question for builders
+
+What does an options venue require that this template does not provide, and what does supplying it cost?
+
+That question reshapes Section 9. If matching, custody and the frontend are no longer greenfield work, the development range stated there is too high — and the saving should be redirected into the risk engine, which is where options venues actually fail.
+
 # 8. Curated Vault Layer
 
 A curated vault aggregates depositor capital and deploys it through the venue's primitives under a defined strategy.
@@ -572,7 +672,11 @@ Both relationships are conversations to open in the RFP response phase, not prec
 | **Reference vault implementations** | 75K – 200K                             | 5 archetypes (Section 8.2)                 |
 | **Insurance reserve (optional)**    | TBD                                    | See Section 10.2 — Sentora                 |
 | **Phase 2 increment (FBTC add)**    | 150K – 400K                            | Audit + integration only                   |
-| **Total ex-LP (Phase 1)**           | 825K – 3.3M                            |                                            |
+| **Total ex-LP (Phase 1)**           | 825K – 3.3M                            | Pre-FCC estimate — see note below          |
+
+**Revision pending (Draft 20).** The development range above assumes matching, custody and frontend are built from scratch. The Flare Foundation's confidential orderbook reference implementation (Section 7.8) supplies all three as working code. If that path is taken, the development line is too high and the audit line changes shape — an attested TEE binary and a vault contract are a different review from a full options protocol.
+
+The saving should not be banked as a lower total. It should be redirected into the margin, settlement and liquidation engine, which the template does not provide and which is where options venues fail. A credible Draft 21 needs a costed answer to one question: what does an options venue require beyond the FCE template, and what does it cost to add? Until that exists, treat the figures above as an upper bound on the matching-and-custody component and an unchanged estimate on the rest.
 
 Funding sources to evaluate:
 
@@ -680,9 +784,21 @@ Three open questions for the community:
 
 Comparable: Deribit runs both stable-margined and coin-margined options on BTC/ETH in parallel, with sophisticated MMs arbitraging between them. This requires institutional MM presence the venue does not have at Phase 1 launch. The decision is whether to wait for that presence or accept thinner cross-numéraire arbitrage initially.
 
+## 10.7 Confidential matching: build on FCE or not?
+
+Section 7.8 sets out the case and the limits. The decision is not purely technical and should not be made by a builder alone.
+
+Open points:
+
+  - What does the margin, settlement and liquidation layer cost on top of the template, and who has built one before?
+  - Is the fire-and-forget ordering model workable for multi-leg strategies and cross-strike risk checks, or does it force a single-pair design that fragments the surface further?
+  - Will prospective LPs and curators accept a venue whose order book they cannot independently audit? This is an allocator question, not an engineering one, and it should be asked before the architecture is fixed.
+  - What is the fallback if the TEE path proves unacceptable — and can the vault and settlement contracts be designed so that the matching layer remains replaceable?
+  - Does building on the Foundation's own reference implementation materially change the grant and governance path described in 11.5?
+
 # 11. Failure Modes
 
-Twelve scenarios that would kill this project. Listed in descending order of likelihood.
+Thirteen scenarios that would kill this project. Listed in descending order of likelihood.
 
 Mitigations are first drafts, not solutions.
 
@@ -692,7 +808,11 @@ On-chain options venues consistently fail on buyer flow, not seller capacity.
 
 If buy-side notional stays below 50% of sell-side, LPs become net long the underlying with no premium income.
 
-Mitigation: subsidise buyer fees in Phase 1 from the incentive pool.
+Draft 20 adds evidence and a competitor. The Derive XRP chain is permissionless, has no minimum, accepts FXRP as collateral and presents a holder-facing interface that quotes an annualised return — and its visible book remains thin (2.3). Whatever the explanation, nothing in that picture suggests buyers are queuing.
+
+The competitor also matters: buyers seeking leveraged upside already have perpetual futures on Flare. A long call offers something a perp does not — it cannot be liquidated, and its maximum loss is known at purchase — but it costs time value and expires. The buyer-side pitch has to win that comparison explicitly, and this document has never made it.
+
+Mitigation: subsidise buyer fees in Phase 1 from the incentive pool, and state the call-versus-perp case as a product requirement rather than assuming buyers arrive because sellers do.
 
 Make this a launch precondition, not an afterthought.
 
@@ -796,14 +916,42 @@ Mitigation: ship while the window is open. The Flare-native advantage is largest
 
 Falsification: if XRPL Smart AMM launches with a working high-frequency oracle and composable hooks before a Flare-native venue reaches mainnet, the structural case weakens materially.
 
+## 11.13 Confidential-venue and TEE risk
+
+Applies only if the FCC path in Section 7.8 is taken. It introduces a failure class a pure smart-contract venue does not carry.
+
+**Hardware trust.** If a TEE vendor is compromised or the attestation chain breaks, the code-hash guarantee collapses. The FCC documentation is explicit that this is mitigated operationally — multiple vendors, rotated attestation — and not by the platform itself. That is an honest disclosure and a real residual risk.
+
+**Liveness dependency.** A proxy outage halts trading. Options decay; an inability to roll or close is a loss, not an inconvenience. Withdrawals remain recoverable through the on-chain path, which bounds the damage to trading rather than custody.
+
+**Opacity.** A confidential book cannot be independently audited for quote quality, maker concentration or wash trading. "Trust the attestation" replaces "verify the chain." For an institutional allocator that may be the harder sell, and it is the opposite of the argument this document makes elsewhere for on-chain venues.
+
+**Ordering.** Fire-and-forget delivery with no ordering guarantee is a constraint on every multi-leg product the roadmap might want.
+
+Mitigation: treat FCC as one evaluated path rather than the architecture; keep the matching layer replaceable behind the vault and settlement contracts; require independent attestation review before mainnet; and test allocator appetite for an unauditable book before committing.
+
+Falsification: if the target LP and curator audience will not accept the TEE dependency, the confidential path is not viable regardless of its technical merits — and the venue falls back to a public book with the market-making economics described in Section 6.
+
 # 12. Sources and Context
 
 Original thread:
 
-[Janus thread on options on Flare (May 3, 2026)](https://x.com/XRPWatcherJanus/status/2050813866196488675)
+[Janus thread on options on Flare (May 3, 2026)](https://x.com/WatcherJanus/status/2050813866196488675)
+
+Long-form background:
+
+[The Unbuilt Monopoly](https://janusthewatcher.substack.com/p/the-unbuilt-monopoly) — Janus the Watcher, Substack
 
 Endorsement and SparkDEX hint:
 
 [@SchwetyBigBags reply](https://x.com/SchwetyBigBags)
 
-Comparable: Rysk Finance on HyperEVM. Contact form (May 2026) requires $250K minimum allocation.
+Comparable, historical: Rysk Finance on HyperEVM. Contact form (May 2026) required a $250K minimum allocation. As of November 2026 the FXRP offering is no longer available; see 2.3. Rysk Premium documentation remains useful on vault architecture and per-vault settlement configuration: [ryskfi.com/premium](https://ryskfi.com/premium/)
+
+Comparable, current: Derive (formerly Lyra). XRP options chain: [app.derive.xyz/trade/options?symbol=XRP](https://app.derive.xyz/trade/options?symbol=XRP). Product and collateral documentation: [docs.derive.xyz/docs/supported-products-1](https://docs.derive.xyz/docs/supported-products-1)
+
+Confidential orderbook reference implementation, Flare Foundation: [github.com/flare-foundation/fce-orderbook](https://github.com/flare-foundation/fce-orderbook). Underlying platform: [Flare Confidential Compute overview](https://dev.flare.network/fcc/overview)
+
+Market size context: on-chain options premium and notional rankings via [DefiLlama](https://defillama.com/options); the 2.4% on-chain-to-Deribit notional ratio for the first nine months of 2026 via [CryptoRank research](https://cryptorank.io/insights/research/onchain-options-premiums-more-than-tripled-in-2026-as-derive-pulled-ahead)
+
+All market observations in this draft date from August to November 2026 and should be re-verified before being relied upon. The competitive picture has changed twice in six months.
